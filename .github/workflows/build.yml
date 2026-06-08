@@ -35,7 +35,7 @@ jobs:
       matrix:
         include:
           - platform: "macos-latest"
-            args: "--target aarch64-apple-darwin --target x86_64-apple-darwin --bundles dmg"
+            args: "--target universal-apple-darwin --bundles dmg"
           - platform: "windows-latest"
             args: "--bundles msi"
           - platform: "ubuntu-latest"
