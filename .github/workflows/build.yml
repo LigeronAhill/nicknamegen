@@ -14,14 +14,16 @@ permissions:
 jobs:
   build-tauri:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - platform: "macos-latest"
-            args: "--target universal-apple-darwin --bundles dmg"
+            target: "aarch64-apple-darwin"
+            bundle: "dmg"
           - platform: "windows-latest"
-            args: "--bundles msi"
+            bundle: "msi"
           - platform: "ubuntu-latest"
-            args: "--bundles appimage"
+            bundle: "appimage"
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +33,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'universal-apple-darwin' || '' }}
+          targets: ${{ matrix.target || '' }}
       - name: Install dependencies (Ubuntu only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
@@ -45,7 +47,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Release ${{ github.ref_name }}"
-          releaseBody: "Автоматическая сборка для ${{ matrix.platform }}"
+          releaseBody: "Автоматическая сборка для ${{ matrix.platform }}${{ matrix.target && format(' ({0})', matrix.target) || '' }}"
           draft: false
           prerelease: false
-          args: ${{ matrix.args }}
+          args: ${{ matrix.target && format('--target {0} --bundles {1}', matrix.target, matrix.bundle) || format('--bundles {0}', matrix.bundle) }}
